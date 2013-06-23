@@ -22,12 +22,12 @@ object MyBuild extends Build
 	def name(module: String) = projectName + "_" + module
 	import BuildSettings._
 
-	
+
 	lazy val root: Project = Project(
 		projectName,
 		file("."),
 		settings = buildSettings ++ lwjgl
-	)  dependsOn (maths)
+	)  dependsOn (maths, graph, mecha)
 
 	lazy val maths: Project = Project(
 		name ("Math"),
@@ -38,6 +38,12 @@ object MyBuild extends Build
 	lazy val graph: Project = Project(
 		name ("Graph"),
 		file("modules/graph"),
+		settings = buildSettings ++ lwjgl
+	)  dependsOn (maths)
+
+	lazy val mecha: Project = Project(
+		name ("Mecha"),
+		file("modules/mecha"),
 		settings = buildSettings ++ lwjgl
 	)
 

@@ -1,111 +1,88 @@
 package warp
 
 import org.lwjgl.LWJGLException
-import org.lwjgl.opengl.Display
-import org.lwjgl.opengl.DisplayMode
 import org.lwjgl.input.Mouse
 import org.lwjgl.input.Keyboard
 import org.lwjgl.opengl.GL11._
+import graph._
+import graph.WG._
+import maths._
+import warp.mecha.Mecha
+import warp.mecha.MechaDisplay
 
-object DisplayExample extends App
+object DisplayApp extends App
 {
 
-	new DisplayExample().start()
+	DisplayExample
+//		.onFullScreen()
+		.withTargetFps(60)
+		.start()
 
 }
 
-class DisplayExample
+object DisplayExample extends MechaDisplay
 {
+	/** position of quad */
+	var x = 400; var y = 300
 
-	def start()
-	{
-		try
-		{
-			Display.setDisplayMode(new DisplayMode(800, 600))
-			Display.create()
-		}
-		catch
-		{
-			case e: LWJGLException =>
-				e.printStackTrace()
-				System.exit(0)
+	/** angle of quad rotation */
+	var rotation = 0.0;
 
-		}
+	def init() {
+		println("OpenGL version: " + glGetString(GL_VERSION))
 
 		// init OpenGL here
 		glMatrixMode(GL_PROJECTION)
 		glLoadIdentity()
-		glOrtho(0, 800, 0, 600, 1, -1)
+		glOrtho(0, width, 0, height, 1, -1)
 		glMatrixMode(GL_MODELVIEW)
 
-		while (!Display.isCloseRequested)
-		{
-
-			// Clear the screen and depth buffer
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
-			// set the color of the quad (R,G,B,A)
-			glColor3f(0.5f, 0.5f, 1.0f)
-
-			// draw quad
-			glBegin(GL_QUADS)
-			glVertex2f(100, 100)
-			glVertex2f(100 + 200, 100)
-			glVertex2f(100 + 200, 100 + 200)
-			glVertex2f(100, 100 + 200)
-			glEnd()
- 
-			pollInput()
-			Display.update()
+		// Callbacks
+		Mecha onFpsUpdate { fps =>
+			setTitle("FPS: " + fps)
 		}
-
-		Display.destroy()
 	}
 
-	def pollInput()
+	def render()
 	{
-
-		if (Mouse.isButtonDown(0))
-		{
-			val x = Mouse.getX
-			val y = Mouse.getY
-
-			println("MOUSE DOWN @ X: " + x + " Y: " + y)
-		}
-
-		if (Keyboard.isKeyDown(Keyboard.KEY_SPACE))
-			println("SPACE KEY IS DOWN")
-
-		while (Keyboard.next())
-		{
-			if (Keyboard.getEventKeyState)
-			{
-				if (Keyboard.getEventKey == Keyboard.KEY_A)
-					println("A Key Pressed")
+		// Clear The Screen And The Depth Buffer
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-				if (Keyboard.getEventKey == Keyboard.KEY_S)
-					println("S Key Pressed")
+		// draw quad
+		glPushMatrix();
+			glTranslatef(x, y, 0);
+			glRotated(rotation, 0f, 0f, 1f);
+			glTranslatef(-x, -y, 0);
 
+			glBegin(GL_QUADS);
+				glColor3b(126, 0, 0)
+				glVertex2f(x - 50, y - 50);
+				glColor3b(0, 126, 0)
+				glVertex2f(x + 50, y - 50);
+				glColor3b(0, 0, 126)
+				glVertex2f(x + 50, y + 50);
+				glColor3b(126, 126, 0)
+				glVertex2f(x - 50, y + 50);
+			glEnd();
+		glPopMatrix();
+	}
 
-				if (Keyboard.getEventKey == Keyboard.KEY_D)
-					println("D Key Pressed")
+	def update()
+	{
+		// rotate quad
+		rotation += 0.05f * Mecha.delta;
 
-			}
-			else
-			{
+		if (Keyboard.isKeyDown(Keyboard.KEY_LEFT))  x -= (0.35f * Mecha.delta).toInt
+		if (Keyboard.isKeyDown(Keyboard.KEY_RIGHT)) x += (0.35f * Mecha.delta).toInt
 
-				if (Keyboard.getEventKey == Keyboard.KEY_A)
-					println("A Key Released")
+		if (Keyboard.isKeyDown(Keyboard.KEY_UP))    y += (0.35f * Mecha.delta).toInt
+		if (Keyboard.isKeyDown(Keyboard.KEY_DOWN))  y -= (0.35f * Mecha.delta).toInt
 
-
-				if (Keyboard.getEventKey == Keyboard.KEY_S)
-					println("S Key Released")
-
-				if (Keyboard.getEventKey == Keyboard.KEY_D)
-					println("D Key Released")
-
-			}
-		}
+		// keep quad on the screen
+		if (x < 0) x = 0;
+		if (x > width) x = width;
+		if (y < 0) y = 0;
+		if (y > height) y = height;
 	}
 }

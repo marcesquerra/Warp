@@ -2,7 +2,7 @@ package warp
 
 import maths._
 
-object Sample extends App
+object Sample // extends App
 {
 
 	val v2 = 3 ** (1, 2, 3)
