@@ -63,6 +63,12 @@ class Vector(val x: Real, val y: Real, val z: Real, val w: Real = 0.0)
 				this * m.col1,   this * m.col2,   this * m.col3,   this * m.col4)
 
 	def normalized = this :/ mod
+
+	def mapX(f: Real => Real) = new Vector(f(x),   y ,   z , f(w))
+	def mapY(f: Real => Real) = new Vector(  x , f(y),   z , f(w))
+	def mapZ(f: Real => Real) = new Vector(  x ,   y , f(z), f(w))
+	def mapW(f: Real => Real) = new Vector(  x ,   y ,   z , f(w))
+
 }
 
 class VectorTravel(val a: Vector, val b: Vector)

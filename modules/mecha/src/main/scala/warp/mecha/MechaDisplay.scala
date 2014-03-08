@@ -5,7 +5,8 @@ import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.DisplayMode
 import org.lwjgl.input.Mouse
 import org.lwjgl.input.Keyboard
-//import org.lwjgl.opengl.GL11._
+import org.lwjgl.opengl.GL11._
+import warp.graph.Camera
 
 
 trait MechaDisplay
@@ -13,6 +14,7 @@ trait MechaDisplay
 	private var fullScreen = false
 	private var _width     = 800
 	private var _height    = 600
+	private var _aspect    = _width / _height
 
 	final def withSize(width: Int, height: Int):this.type = {
 		fullScreen = false
@@ -21,8 +23,9 @@ trait MechaDisplay
 		this
 	}
 
-	final def width  = _width
-	final def height = _height
+	final def width        = _width
+	final def height       = _height
+	final def aspectRatio  = _width / _height
 
 	def onFullScreen():this.type = {fullScreen = true; this}
 
@@ -61,24 +64,38 @@ trait MechaDisplay
 
 		}
 
-		init()
+		_camera = init()
+
+		if(_camera == null) throw new NullPointerException()
+
+		_camera.init(aspectRatio)
 
 		while (!Display.isCloseRequested)
 		{
-			Mecha.preFrame
+			Mecha.preFrame()
 
 			update()
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+			camera.prepare()
 			render()
 
 			Display.update()
 			if(!fullScreen)
-				Display.sync(_fpsTarget); // cap fps to 60fps
+				Display.sync(_fpsTarget)
 		}
 
 		Display.destroy()
 	}
 
-	def init(): Unit
+	private var _camera: Camera = _
+	def camera = _camera
+	def camera_=(c: Camera) =
+		if(c == null) throw new NullPointerException()
+		else _camera = c
+
+	def init(): Camera
 
 	def render(): Unit
 

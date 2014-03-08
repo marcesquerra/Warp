@@ -39,12 +39,12 @@ object MyBuild extends Build
 		name ("Graph"),
 		file("modules/graph"),
 		settings = buildSettings ++ lwjgl
-	)  dependsOn (maths)
+	)  dependsOn maths
 
 	lazy val mecha: Project = Project(
 		name ("Mecha"),
 		file("modules/mecha"),
 		settings = buildSettings ++ lwjgl
-	)
+	)  dependsOn graph
 
 }
